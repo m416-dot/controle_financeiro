@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Controle Financeiro</title>
+</head>
+<body>
+
+<h1>Controle Financeiro</h1>
+
+<h3>Nova movimentação</h3>
+
+<select id="tipo">
+    <option value="Receita">Receita</option>
+    <option value="Despesa">Despesa</option>
+</select>
+
+<input type="date" id="data">
+<input type="number" id="valor" placeholder="Valor">
+<input type="text" id="descricao" placeholder="Descrição">
+
+<button onclick="adicionar()">Adicionar</button>
+
+<hr>
+
+<h3>Movimentações</h3>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Data</th>
+            <th>Valor</th>
+            <th>Descrição</th>
+        </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+</table>
+
+<script src="script.js"></script>
+</body>
+</html>

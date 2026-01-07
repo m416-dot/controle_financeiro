@@ -1,0 +1,100 @@
+        .formulario {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        input, select {
+            width: 100%;
+            height: 44px;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            background-color: #222;
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 6px;
+            border: none;
+            background-color: #4caf50;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #43a047;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #1f1f1f;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #2a2a2a;
+        }
+
+        tr:nth-child(even) {
+            background-color: #252525;
+        }
+        
+        .resumo {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .card {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .receita {background-color: #2e7d32;}
+        .despesa {background-color: #c62828;}
+        .saldo {background-color: #1565c0;}
+
+        @media (max-width: 600px) {
+            .resumo {
+                flex-direction: column;
+            }
+        }
+
+        .filtros {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
