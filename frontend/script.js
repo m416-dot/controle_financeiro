@@ -66,3 +66,8 @@ function atualizarTabela(lista) {
         `;
     });
 }
+
+// ==============================
+// CARREGA AO ABRIR A PÁGINA
+// ==============================
+document.addEventListener("DOMContentLoaded", carregarMovimentacoes);
