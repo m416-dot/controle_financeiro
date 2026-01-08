@@ -1,44 +1,56 @@
-const API_URL = "http://localhost:3000/movimentacoes";
+const API_URL = "https://controle-financeiro-ydii.onrender.com";
 
-// CARREGA DADOS AO ABRIR A PÁGINA
-document.addEventListener("DOMContentLoaded", carregarMovimentacoes);
+// ==============================
+// BUSCAR MOVIMENTAÇÕES (GET)
+// ==============================
+async function carregarMovimentacoes() {
+    try {
+        const response = await fetch(`${API_URL}/movimentacoes`);
+        const dados = await response.json();
 
-function carregarMovimentacoes() {
-    fetch(API_URL)
-        .then(res => res.json())
-        .then(dados => {
-            atualizarTabela(dados);
-        })
-        .catch(err => console.error("Erro ao buscar dados:", err));
+        atualizarTabela(dados);
+    } catch (erro) {
+        console.error("Erro ao carregar movimentações:", erro);
+    }
 }
 
-function adicionar() {
+// ==============================
+// ADICIONAR MOVIMENTAÇÃO (POST)
+// ==============================
+async function adicionar() {
     const tipo = document.getElementById("tipo").value;
     const data = document.getElementById("data").value;
     const valor = document.getElementById("valor").value;
     const descricao = document.getElementById("descricao").value;
 
-    const novaMovimentacao = {
-        tipo,
-        data,
-        valor,
-        descricao
-    };
+    if (!tipo || !data || !valor) {
+        alert("Preencha os campos obrigatórios");
+        return;
+    }
 
-    fetch(API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(novaMovimentacao)
-    })
-        .then(res => res.json())
-        .then(() => {
-            carregarMovimentacoes(); // recarrega tabela
-        })
-        .catch(err => console.error("Erro ao salvar:", err));
+    try {
+        await fetch(`${API_URL}/movimentacoes`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                tipo,
+                data,
+                valor,
+                descricao
+            })
+        });
+
+        carregarMovimentacoes(); // recarrega a tabela
+    } catch (erro) {
+        console.error("Erro ao salvar:", erro);
+    }
 }
 
+// ==============================
+// ATUALIZAR TABELA
+// ==============================
 function atualizarTabela(lista) {
     const tabela = document.getElementById("tabela");
     tabela.innerHTML = "";
@@ -48,7 +60,7 @@ function atualizarTabela(lista) {
             <tr>
                 <td>${item.tipo}</td>
                 <td>${item.data}</td>
-                <td>R$ ${item.valor}</td>
+                <td>R$ ${Number(item.valor).toFixed(2)}</td>
                 <td>${item.descricao || ""}</td>
             </tr>
         `;
