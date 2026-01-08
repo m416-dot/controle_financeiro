@@ -1,29 +1,36 @@
-const API_URL = "https://controle-financeiro-ydii.onrender.com/movimentacoes";
+const API_URL = "/movimentacoes";
 
-async function carregarMovimentacoes() {
-    try {
-        const response = await fetch(API_URL);
-        const dados = await response.json();
-        atualizarTabela(dados);
-    } catch (erro) {
-        console.error("Erro ao carregar movimentações:", erro);
-    }
+// CARREGA AO ABRIR
+document.addEventListener("DOMContentLoaded", carregarMovimentacoes);
+
+function carregarMovimentacoes() {
+    fetch(API_URL)
+        .then(res => res.json())
+        .then(dados => atualizarTabela(dados))
+        .catch(err => console.error("Erro ao buscar dados:", err));
 }
 
 function adicionar() {
     const tipo = document.getElementById("tipo").value;
     const data = document.getElementById("data").value;
-    const valor = document.getElementById("valor").value;
+    const valor = Number(document.getElementById("valor").value);
     const descricao = document.getElementById("descricao").value;
+
+    if (!tipo || !data || !valor) {
+        alert("Preencha os campos obrigatórios");
+        return;
+    }
 
     fetch(API_URL, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tipo, data, valor, descricao })
     })
-    .then(() => carregarMovimentacoes())
+    .then(res => res.json())
+    .then(() => {
+        carregarMovimentacoes();
+        limparFormulario();
+    })
     .catch(err => console.error("Erro ao salvar:", err));
 }
 
@@ -43,4 +50,9 @@ function atualizarTabela(lista) {
     });
 }
 
-document.addEventListener("DOMContentLoaded", carregarMovimentacoes);
+function limparFormulario() {
+    document.getElementById("tipo").value = "";
+    document.getElementById("data").value = "";
+    document.getElementById("valor").value = "";
+    document.getElementById("descricao").value = "";
+}
