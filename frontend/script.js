@@ -1,56 +1,32 @@
-const API_URL = "https://controle-financeiro-ydii.onrender.com";
+const API_URL = "https://controle-financeiro-ydii.onrender.com/movimentacoes";
 
-// ==============================
-// BUSCAR MOVIMENTAÇÕES (GET)
-// ==============================
 async function carregarMovimentacoes() {
     try {
-        const response = await fetch(`${API_URL}/movimentacoes`);
+        const response = await fetch(API_URL);
         const dados = await response.json();
-
         atualizarTabela(dados);
     } catch (erro) {
         console.error("Erro ao carregar movimentações:", erro);
     }
 }
 
-// ==============================
-// ADICIONAR MOVIMENTAÇÃO (POST)
-// ==============================
-async function adicionar() {
+function adicionar() {
     const tipo = document.getElementById("tipo").value;
     const data = document.getElementById("data").value;
     const valor = document.getElementById("valor").value;
     const descricao = document.getElementById("descricao").value;
 
-    if (!tipo || !data || !valor) {
-        alert("Preencha os campos obrigatórios");
-        return;
-    }
-
-    try {
-        await fetch(`${API_URL}/movimentacoes`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                tipo,
-                data,
-                valor,
-                descricao
-            })
-        });
-
-        carregarMovimentacoes(); // recarrega a tabela
-    } catch (erro) {
-        console.error("Erro ao salvar:", erro);
-    }
+    fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ tipo, data, valor, descricao })
+    })
+    .then(() => carregarMovimentacoes())
+    .catch(err => console.error("Erro ao salvar:", err));
 }
 
-// ==============================
-// ATUALIZAR TABELA
-// ==============================
 function atualizarTabela(lista) {
     const tabela = document.getElementById("tabela");
     tabela.innerHTML = "";
@@ -60,14 +36,11 @@ function atualizarTabela(lista) {
             <tr>
                 <td>${item.tipo}</td>
                 <td>${item.data}</td>
-                <td>R$ ${Number(item.valor).toFixed(2)}</td>
+                <td>R$ ${item.valor}</td>
                 <td>${item.descricao || ""}</td>
             </tr>
         `;
     });
 }
 
-// ==============================
-// CARREGA AO ABRIR A PÁGINA
-// ==============================
 document.addEventListener("DOMContentLoaded", carregarMovimentacoes);
