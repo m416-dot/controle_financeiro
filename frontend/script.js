@@ -1,13 +1,19 @@
-const API_URL = "/movimentacoes";
+const API_URL = "https://controle-financeiro-ydii.onrender.com/movimentacoes";
 
 // CARREGA AO ABRIR
 document.addEventListener("DOMContentLoaded", carregarMovimentacoes);
 
 function carregarMovimentacoes() {
     fetch(API_URL)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error("Erro ao buscar dados");
+            return res.json();
+        })
         .then(dados => atualizarTabela(dados))
-        .catch(err => console.error("Erro ao buscar dados:", err));
+        .catch(err => {
+            console.error(err);
+            alert("Erro ao carregar movimentações");
+        });
 }
 
 function adicionar() {
@@ -26,12 +32,18 @@ function adicionar() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tipo, data, valor, descricao })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("Erro ao salvar");
+        return res.json();
+    })
     .then(() => {
         carregarMovimentacoes();
         limparFormulario();
     })
-    .catch(err => console.error("Erro ao salvar:", err));
+    .catch(err => {
+        console.error(err);
+        alert("Erro ao salvar movimentação");
+    });
 }
 
 function atualizarTabela(lista) {
@@ -43,7 +55,7 @@ function atualizarTabela(lista) {
             <tr>
                 <td>${item.tipo}</td>
                 <td>${item.data}</td>
-                <td>R$ ${item.valor}</td>
+                <td>R$ ${Number(item.valor).toFixed(2)}</td>
                 <td>${item.descricao || ""}</td>
             </tr>
         `;
@@ -51,7 +63,7 @@ function atualizarTabela(lista) {
 }
 
 function limparFormulario() {
-    document.getElementById("tipo").value = "";
+    document.getElementById("tipo").value = "Receita";
     document.getElementById("data").value = "";
     document.getElementById("valor").value = "";
     document.getElementById("descricao").value = "";
