@@ -5,15 +5,9 @@ const { Pool } = require("pg");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* =========================
-   MIDDLEWARES
-========================= */
 app.use(cors());
 app.use(express.json());
 
-/* =========================
-   CONEXÃO COM SUPABASE
-========================= */
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -21,31 +15,12 @@ const pool = new Pool({
     }
 });
 
-/* =========================
-   CRIA TABELA (SE NÃO EXISTIR)
-========================= */
-pool.query(`
-    CREATE TABLE IF NOT EXISTS movimentacoes (
-        id SERIAL PRIMARY KEY,
-        tipo TEXT NOT NULL,
-        data DATE NOT NULL,
-        valor NUMERIC NOT NULL,
-        descricao TEXT
-    );
-`)
-.then(() => console.log("Tabela 'movimentacoes' pronta"))
-.catch(err => console.error("Erro ao criar tabela:", err));
-
-/* =========================
-   ROTAS
-========================= */
-
-// TESTE DE VIDA
+// ROTA TESTE
 app.get("/", (req, res) => {
-    res.send("API Controle Financeiro funcionando 🚀");
+    res.send("API funcionando 🚀");
 });
 
-// LISTAR MOVIMENTAÇÕES
+// LISTAR
 app.get("/movimentacoes", async (req, res) => {
     try {
         const result = await pool.query(
@@ -57,7 +32,7 @@ app.get("/movimentacoes", async (req, res) => {
     }
 });
 
-// ADICIONAR MOVIMENTAÇÃO
+// INSERIR
 app.post("/movimentacoes", async (req, res) => {
     const { tipo, data, valor, descricao } = req.body;
 
@@ -79,24 +54,6 @@ app.post("/movimentacoes", async (req, res) => {
     }
 });
 
-// DELETAR MOVIMENTAÇÃO (opcional, mas útil)
-app.delete("/movimentacoes/:id", async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        await pool.query(
-            "DELETE FROM movimentacoes WHERE id = $1",
-            [id]
-        );
-        res.json({ message: "Movimentação removida" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-/* =========================
-   START DO SERVIDOR
-========================= */
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log("Servidor rodando 🚀");
 });
