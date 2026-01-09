@@ -1,46 +1,39 @@
 console.log("Servidor iniciando...");
 
-// ============================
-// IMPORTA DEPENDÊNCIAS
-// ============================
+const { Pool } = require("pg");
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
-// ============================
-// CONFIGURAÇÕES
-// ============================
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ============================
-// MIDDLEWARES
-// ============================
-app.use(express.json());
-
-// ============================
-// CAMINHO DO FRONTEND
-// ============================
-const frontendPath = path.join(__dirname, "../frontend");
-
-// 👉 SERVE ARQUIVOS ESTÁTICOS (script.js, css, etc)
-app.use(express.static(frontendPath));
-
-// ============================
-// CAMINHO DO BANCO
-// ============================
-const dbPath = path.resolve(__dirname, "database.db");
-
-// ============================
-// BANCO DE DADOS
-// ============================
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error("Erro ao conectar ao banco:", err.message);
-    } else {
-        console.log("Banco SQLite conectado com sucesso!");
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
     }
 });
+
+pool.query(`
+  CREATE TABLE IF NOT EXISTS movimentacoes (
+    id SERIAL PRIMARY KEY,
+    tipo TEXT NOT NULL,
+    data DATE NOT NULL,
+    valor NUMERIC NOT NULL,
+    descricao TEXT
+  )
+`).then(() => {
+  console.log("Tabela movimentacoes pronta");
+}).catch(err => {
+  console.error("Erro ao criar tabela:", err);
+});
+
+
+app.use(express.json());
+
+const frontendPath = path.join(__dirname, "../frontend");
+
+app.use(express.static(frontendPath));
 
 db.run(`
     CREATE TABLE IF NOT EXISTS movimentacoes (
@@ -52,55 +45,42 @@ db.run(`
     )
 `);
 
-// ============================
-// ROTAS DO FRONTEND
-// ============================
 app.get("/", (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// ============================
-// ROTAS DA API
-// ============================
-app.get("/movimentacoes", (req, res) => {
-    db.all("SELECT * FROM movimentacoes", [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json(rows);
-    });
+app.get("/movimentacoes", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM movimentacoes ORDER BY id DESC"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post("/movimentacoes", (req, res) => {
-    const { tipo, valor, data, descricao } = req.body;
+app.post("/movimentacoes", async (req, res) => {
+  const { tipo, valor, data, descricao } = req.body;
 
-    if (!tipo || !valor || !data) {
-        return res.status(400).json({ error: "Dados obrigatórios faltando." });
-    }
+  if (!tipo || !valor || !data) {
+    return res.status(400).json({ error: "Dados obrigatórios faltando." });
+  }
 
-    const sql = `
-        INSERT INTO movimentacoes (tipo, valor, data, descricao)
-        VALUES (?, ?, ?, ?)
-    `;
+  try {
+    const result = await pool.query(
+      `INSERT INTO movimentacoes (tipo, valor, data, descricao)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [tipo, valor, data, descricao]
+    );
 
-    db.run(sql, [tipo, valor, data, descricao], function (err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-
-        res.status(201).json({
-            id: this.lastID,
-            tipo,
-            valor,
-            data,
-            descricao
-        });
-    });
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// ============================
-// INICIA SERVIDOR
-// ============================
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
