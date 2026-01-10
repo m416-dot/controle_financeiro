@@ -10,9 +10,12 @@ app.use(express.json());
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: true
-    }
-);
+    ssl: {
+        require: true,
+        rejectUnauthorized: false
+    },
+    family: 4 // 👈 FORÇA IPv4 (ESSENCIAL)
+});
 
 // ROTA TESTE
 app.get("/", (req, res) => {
